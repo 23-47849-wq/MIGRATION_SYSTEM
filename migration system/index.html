@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Classroom — Werlyn Dee Ramos (Modules)</title>
+<style>
+:root{
+  --gc-green:#3aa655;
+  --gc-green-dark:#2f944a;
+  --bg:#f1f3f4;
+  --card:#ffffff;
+  --muted:#5f6368;
+  --rounded:12px;
+  --shadow:0 8px 28px rgba(15,23,42,0.08);
+  --max-file-mb:5;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter, "Google Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:var(--bg);color:#202124}
+header.app-header{height:72px;background:linear-gradient(180deg,var(--gc-green),var(--gc-green-dark));color:white;display:flex;align-items:center;padding:0 20px;gap:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.brand .logo{width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:22px}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn{background:white;color:var(--gc-green);border:none;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.btn.ghost{background:transparent;color:white;border:1px solid rgba(255,255,255,0.12)}
+.container{display:flex;height:calc(100vh - 72px)}
+aside.sidebar{width:260px;background:var(--card);padding:18px;border-right:1px solid rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:12px}
+aside nav a{display:block;padding:10px;border-radius:8px;color:#202124;text-decoration:none;font-weight:600;margin-bottom:6px}
+aside nav a.active, aside nav a:hover{background:rgba(58,166,85,0.08)}
+.main{flex:1;padding:22px;overflow:auto}
+.card{background:var(--card);border-radius:var(--rounded);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.muted{color:var(--muted);font-size:13px}
+.small{font-size:13px;color:var(--muted)}
+.assign{display:flex;justify-content:space-between;gap:10px;padding:12px;border-radius:10px;border:1px solid #f1f3f4;margin-bottom:10px;align-items:flex-start}
+.left{max-width:70%}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px}
+.badge.due{background:#fff4e5;color:#b45f00;border:1px solid rgba(180,95,0,0.08)}
+.badge.open{background:#e7f6ec;color:#0b8043}
+.tiny{font-size:12px;color:var(--muted)}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.input{padding:8px;border-radius:8px;border:1px solid #e6e6e6;width:100%}
+.people .person{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;border:1px solid #f1f3f4;margin-bottom:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modalCard{background:white;border-radius:12px;padding:16px;max-width:980px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,0.25)}
+.tabBtn{padding:8px 12px;border-radius:8px;border:1px solid #eee;background:#fafafa;cursor:pointer}
+.tabBtn.active{background:var(--gc-green);color:white}
+.banner{height:140px;border-radius:10px 10px 0 0;overflow:hidden;background-size:cover;background-position:center}
+.login-banner-title{padding:14px;color:white;font-weight:800;font-size:18px}
+.file-link{color:var(--gc-green);text-decoration:none;font-weight:700}
+.status.missing{color:#b31412;font-weight:700}
+.status.submitted{color:#188038;font-weight:700}
+@media (max-width:900px){aside.sidebar{display:none}.container{flex-direction:column}}
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">☘️</div>
+      <div>
+        <div style="font-weight:800">Classroom — Werlyn Dee Ramos</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.9)">Google Classroom — Modules demo</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <div id="whoIs" class="small" style="color:white">Not logged in</div>
+      <button id="openLogin" class="btn ghost">Login</button>
+      <button id="createBtn" class="btn" style="display:none">+ Create</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <nav>
+        <a href="#" data-page="stream" class="nav-link active">🏠 Stream</a>
+        <a href="#" data-page="classwork" class="nav-link">📚 Classwork</a>
+        <a href="#" data-page="modules" class="nav-link">📦 Modules</a>
+        <a href="#" data-page="quizzes" class="nav-link">📝 Quizzes</a>
+        <a href="#" data-page="grades" class="nav-link">📊 Grades</a>
+        <a href="#" data-page="people" class="nav-link">👥 People</a>
+        <a href="#" data-page="teacher" class="nav-link" id="teacherNav" style="display:none">🧑‍🏫 Teacher</a>
+      </nav>
+
+      <div class="card small">
+        <strong>Quick Info</strong>
+        <div style="margin-top:8px" id="quick">No modules/assignments yet.</div>
+      </div>
+
+      <div class="card small">
+        <strong>Local Storage</strong>
+        <div style="margin-top:8px">
+          <button id="resetBtn" class="btn">Reset Demo</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <!-- content rendered here -->
+    </main>
+  </div>
+
+  <!-- Login modal with classroom banner -->
+  <div id="loginModal" class="modal" style="display:none">
+    <div class="modalCard">
+      <div style="overflow:hidden;border-radius:10px">
+        <div class="banner" id="loginBanner" style="background-image:url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop');"></div>
+        <div style="background:linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.15)); margin-top:-40px; padding:10px 16px;">
+          <div class="login-banner-title">Classroom — Werlyn Dee Ramos</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px">
+        <div style="flex:1;padding-right:12px;border-right:1px solid #f1f3f4">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <div id="tabTeacher" class="tabBtn active">Teacher</div>
+            <div id="tabStudent" class="tabBtn">Student</div>
+          </div>
+          <div id="teacherForm">
+            <label class="tiny">Username</label>
+            <input id="tUser" class="input" value="teacher" />
+            <label class="tiny" style="margin-top:8px">Password</label>
+            <input id="tPass" class="input" type="password" placeholder="12345" />
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
+              <button id="tLogin" class="btn">Login as Teacher</button>
+            </div>
+            <div class="tiny" style="margin-top:8px;color:#666">Default teacher: <strong>teacher</strong> / <strong>12345</strong></div>
+          </div>
+        </div>
+
+        <div style="flex:1;padding-left:12px">
+          <div id="studentForm" style="display:none">
+            <label class="tiny">Username</label>
+            <input id="sUser" class="input" placeholder="student username" />
+            <label class="tiny" style="margin-top:8px">Password</label>
+            <input id="sPass" class="input" type="password" placeholder="password" />
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
+              <button id="sLogin" class="btn">Login as Student</button>
+            </div>
+            <div class="tiny" style="margin-top:8px;color:#666">When teacher adds a student, credentials are shown.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Assignment modal -->
+  <div id="createAssignModal" class="modal" style="display:none">
+    <div class="modalCard">
+      <h3 style="margin:0 0 8px 0">Create Assignment</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="asTitle" class="input" placeholder="Title (required)" />
+        <textarea id="asDesc" class="input" placeholder="Description (optional)"></textarea>
+        <div style="display:flex;gap:8px">
+          <input id="asDue" class="input" type="date" />
+          <input id="asPoints" class="input" type="number" placeholder="Max points (optional)" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button id="asCancel" class="btn">Cancel</button>
+          <button id="asSave" class="btn">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Module modal -->
+  <div id="createModuleModal" class="modal" style="display:none">
+    <div class="modalCard">
+      <h3 style="margin:0 0 8px 0">Create Module</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="mTitle" class="input" placeholder="Module title (required)" />
+        <textarea id="mDesc" class="input" placeholder="Description / instructions"></textarea>
+        <div style="display:flex;gap:8px">
+          <input id="mDue" class="input" type="date" />
+          <input id="mFile" class="input" type="file" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button id="mCancel" class="btn">Cancel</button>
+          <button id="mSave" class="btn">Create Module</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Quiz modal -->
+  <div id="quizModal" class="modal" style="display:none">
+    <div class="modalCard">
+      <h3 style="margin:0 0 8px 0">Create Quiz (MCQ)</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="qTitle" class="input" placeholder="Quiz title (required)" />
+        <label class="tiny">Due date (optional)</label>
+        <input id="qDue" class="input" type="date" />
+        <div id="qb" style="display:flex;flex-direction:column;gap:8px;margin-top:6px"></div>
+        <div style="display:flex;gap:8px">
+          <button id="addQ" class="btn">+ Add question</button>
+          <div style="flex:1"></div>
+          <button id="qCancel" class="btn">Cancel</button>
+          <button id="qSave" class="btn">Save Quiz</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* -------------------------
+  localStorage keys & helpers
+------------------------- */
+const LS_ACCOUNTS = 'c_wr_accounts_v4';
+const LS_STUDENTS = 'c_wr_students_v4';
+const LS_ASSIGN = 'c_wr_assign_v4';
+const LS_MODULES = 'c_wr_modules_v4';
+const LS_QUIZ = 'c_wr_quiz_v4';
+const LS_ROLE = 'c_wr_role_v4';
+
+function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+function loadObj(k){ return JSON.parse(localStorage.getItem(k)) || {}; }
+function loadArr(k){ return JSON.parse(localStorage.getItem(k)) || []; }
+function save(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function now(){ return new Date().toISOString(); }
+function fmtShort(d){ if(!d) return ''; return new Date(d).toLocaleDateString(); }
+function fmtTime(d){ if(!d) return ''; return new Date(d).toLocaleString(); }
+function isPast(dateStr){ if(!dateStr) return false; return new Date() > new Date(dateStr + 'T23:59:59'); }
+function esc(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* -------------------------
+  default teacher & sample module
+------------------------- */
+const DEFAULT_TEACHER = { username:'teacher', password:'12345', role:'teacher' };
+
+/* load state */
+let accounts = loadObj(LS_ACCOUNTS);
+let students = loadArr(LS_STUDENTS);
+let assignments = loadArr(LS_ASSIGN);
+let modules = loadArr(LS_MODULES);
+let quizzes = loadArr(LS_QUIZ);
+let role = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+
+/* ensure teacher exists */
+if(!accounts[DEFAULT_TEACHER.username]){ accounts[DEFAULT_TEACHER.username] = {...DEFAULT_TEACHER}; save(LS_ACCOUNTS, accounts); }
+
+/* if empty, add sample data including sample module */
+if(students.length === 0 && assignments.length === 0 && modules.length === 0 && quizzes.length === 0){
+  const sid = uid('stu');
+  students.push({ id: sid, name: 'Louisana Mallari' });
+  accounts['louisana'] = { username:'louisana', password:'pass123', role:'student', studentId: sid };
+
+  const aDue = new Date(); aDue.setDate(aDue.getDate() + 1);
+  const assignId = uid('a');
+  assignments.push({ id: assignId, title: 'Business Plan Outline', desc: 'Submit a one-page business plan outline.', due: aDue.toISOString().slice(0,10), points:100, createdAt: now(), submissions: {} });
+
+  // sample PDF (small text saved as a "text/pdf" data URL is not ideal, so we use a tiny text file as sample)
+  const sampleText = 'Introduction to ICT - Sample Module\\nRead this sample to start the class.';
+  const sampleDataUrl = 'data:text/plain;base64,' + btoa(sampleText);
+
+  const modDue = new Date(); modDue.setDate(modDue.getDate() + 3);
+  const modId = uid('m');
+  modules.push({
+    id: modId,
+    title: 'Introduction to ICT',
+    desc: 'Read the introduction and submit a one-page reflection.',
+    due: modDue.toISOString().slice(0,10),
+    fileName: 'intro_to_ict.txt',
+    fileUrl: sampleDataUrl,
+    createdAt: now(),
+    submissions: {}
+  });
+
+  const qId = uid('q');
+  quizzes.push({
+    id: qId,
+    title: 'Week 1 Quiz',
+    due: new Date(new Date().setDate(new Date().getDate()+2)).toISOString().slice(0,10),
+    questions: [
+      { q: 'What is a business plan?', choices: ['Description of a plan', 'Financial ledger', 'Employee roster', 'None of the above'], answerIndex: 0 },
+      { q: 'Which is important in marketing?', choices: ['Target audience','Printer model','Weather','None'], answerIndex: 0 }
+    ],
+    createdAt: now(),
+    attempts: {}
+  });
+
+  save(LS_STUDENTS, students);
+  save(LS_ASSIGN, assignments);
+  save(LS_MODULES, modules);
+  save(LS_QUIZ, quizzes);
+  save(LS_ACCOUNTS, accounts);
+}
+
+/* reload */
+accounts = loadObj(LS_ACCOUNTS);
+students = loadArr(LS_STUDENTS);
+assignments = loadArr(LS_ASSIGN);
+modules = loadArr(LS_MODULES);
+quizzes = loadArr(LS_QUIZ);
+role = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+
+/* -------------------------
+  DOM refs
+------------------------- */
+const main = document.getElementById('main');
+const whoIs = document.getElementById('whoIs');
+const openLogin = document.getElementById('openLogin');
+const loginModal = document.getElementById('loginModal');
+const tabTeacher = document.getElementById('tabTeacher');
+const tabStudent = document.getElementById('tabStudent');
+const teacherForm = document.getElementById('teacherForm');
+const studentForm = document.getElementById('studentForm');
+const tUser = document.getElementById('tUser');
+const tPass = document.getElementById('tPass');
+const sUser = document.getElementById('sUser');
+const sPass = document.getElementById('sPass');
+const tLogin = document.getElementById('tLogin');
+const sLogin = document.getElementById('sLogin');
+const createBtn = document.getElementById('createBtn');
+const createAssignModal = document.getElementById('createAssignModal');
+const asTitle = document.getElementById('asTitle');
+const asDesc = document.getElementById('asDesc');
+const asDue = document.getElementById('asDue');
+const asPoints = document.getElementById('asPoints');
+const asCancel = document.getElementById('asCancel');
+const asSave = document.getElementById('asSave');
+const createModuleModal = document.getElementById('createModuleModal');
+const mTitle = document.getElementById('mTitle');
+const mDesc = document.getElementById('mDesc');
+const mDue = document.getElementById('mDue');
+const mFile = document.getElementById('mFile');
+const mCancel = document.getElementById('mCancel');
+const mSave = document.getElementById('mSave');
+const qb = document.getElementById('qb');
+const addQ = document.getElementById('addQ');
+const qSave = document.getElementById('qSave');
+const qCancel = document.getElementById('qCancel');
+const qTitle = document.getElementById('qTitle');
+const qDue = document.getElementById('qDue');
+const quick = document.getElementById('quick');
+const resetBtn = document.getElementById('resetBtn');
+const teacherNav = document.getElementById('teacherNav');
+
+/* -------------------------
+  header & login UI
+------------------------- */
+function updateHeader(){
+  role = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+  if(!role){ whoIs.textContent = 'Not logged in'; openLogin.style.display='inline-block'; createBtn.style.display='none'; teacherNav.style.display='none'; openLogin.textContent='Login'; openLogin.onclick = ()=> openLoginModal(); }
+  else if(role.type === 'teacher'){ whoIs.textContent = 'Werlyn Dee Ramos (Teacher)'; openLogin.textContent = 'Logout'; openLogin.onclick = ()=> { if(confirm('Logout?')){ localStorage.removeItem(LS_ROLE); init(); } }; createBtn.style.display='inline-block'; teacherNav.style.display='block'; }
+  else { const s = students.find(x=>x.id===role.studentId); whoIs.textContent = (s? s.name : role.username) + ' (Student)'; openLogin.textContent='Logout'; openLogin.onclick = ()=> { if(confirm('Logout?')){ localStorage.removeItem(LS_ROLE); init(); } }; createBtn.style.display='none'; teacherNav.style.display='none'; }
+  updateQuick();
+}
+function openLoginModal(){ loginModal.style.display='flex'; setLoginTab('teacher'); }
+function closeLoginModal(){ loginModal.style.display='none'; }
+function setLoginTab(t){ if(t==='teacher'){ tabTeacher.classList.add('active'); tabStudent.classList.remove('active'); teacherForm.style.display=''; studentForm.style.display='none'; } else { tabTeacher.classList.remove('active'); tabStudent.classList.add('active'); teacherForm.style.display='none'; studentForm.style.display=''; } }
+
+openLogin.addEventListener('click', ()=> { role = JSON.parse(localStorage.getItem(LS_ROLE)) || null; if(!role) openLoginModal(); else { if(confirm('Logout?')){ localStorage.removeItem(LS_ROLE); init(); } } });
+tabTeacher.addEventListener('click', ()=> setLoginTab('teacher'));
+tabStudent.addEventListener('click', ()=> setLoginTab('student'));
+
+/* -------------------------
+  auth
+------------------------- */
+tLogin.addEventListener('click', ()=>{
+  const u = tUser.value.trim(); const p = tPass.value;
+  if(!u || !p) return alert('Enter username & password');
+  accounts = loadObj(LS_ACCOUNTS);
+  const acc = accounts[u];
+  if(!acc || acc.password !== p || acc.role !== 'teacher') return alert('Invalid teacher credentials');
+  localStorage.setItem(LS_ROLE, JSON.stringify({type:'teacher', username:u}));
+  closeLoginModal(); init();
+});
+sLogin.addEventListener('click', ()=>{
+  const u = sUser.value.trim(); const p = sPass.value;
+  if(!u || !p) return alert('Enter username & password');
+  accounts = loadObj(LS_ACCOUNTS);
+  const acc = accounts[u];
+  if(!acc || acc.password !== p || acc.role !== 'student') return alert('Invalid student credentials');
+  localStorage.setItem(LS_ROLE, JSON.stringify({type:'student', username:u, studentId: acc.studentId}));
+  closeLoginModal(); init();
+});
+
+/* -------------------------
+  create assignment or module (createBtn asks)
+------------------------- */
+createBtn.addEventListener('click', ()=> {
+  const choice = confirm('Create Assignment? (OK = Assignment, Cancel = Module)');
+  if(choice) createAssignModal.style.display='flex';
+  else createModuleModal.style.display='flex';
+});
+asCancel.addEventListener('click', ()=> { createAssignModal.style.display='none'; });
+asSave.addEventListener('click', ()=>{
+  const title = asTitle.value.trim(); if(!title) return alert('Enter title');
+  const desc = asDesc.value.trim(); const due = asDue.value || null; const points = asPoints.value ? Number(asPoints.value) : null;
+  const id = uid('a'); assignments.unshift({ id, title, desc, due, points, createdAt: now(), submissions: {} });
+  save(LS_ASSIGN, assignments);
+  asTitle.value=''; asDesc.value=''; asDue.value=''; asPoints.value=''; createAssignModal.style.display='none';
+  renderPage('classwork'); updateQuick();
+});
+
+/* -------------------------
+  create module
+------------------------- */
+mCancel.addEventListener('click', ()=> { createModuleModal.style.display='none'; mFile.value=''; });
+mSave.addEventListener('click', ()=>{
+  const title = mTitle.value.trim(); if(!title) return alert('Enter module title');
+  const desc = mDesc.value.trim(); const due = mDue.value || null;
+  const fileInput = mFile;
+  if(fileInput.files && fileInput.files.length > 0){
+    const f = fileInput.files[0];
+    const max = Number(getComputedStyle(document.documentElement).getPropertyValue('--max-file-mb'))*1024*1024;
+    if(f.size > max) return alert('File too large (max ' + getComputedStyle(document.documentElement).getPropertyValue('--max-file-mb') + ' MB)');
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const id = uid('m'); modules.unshift({ id, title, desc, due, createdAt: now(), fileName: f.name, fileUrl: ev.target.result, submissions: {} });
+      save(LS_MODULES, modules);
+      mTitle.value=''; mDesc.value=''; mDue.value=''; mFile.value=''; createModuleModal.style.display='none';
+      renderPage('modules'); updateQuick();
+    };
+    reader.readAsDataURL(f);
+  } else {
+    const id = uid('m'); modules.unshift({ id, title, desc, due, createdAt: now(), fileName: null, fileUrl: null, submissions: {} });
+    save(LS_MODULES, modules);
+    mTitle.value=''; mDesc.value=''; mDue.value=''; createModuleModal.style.display='none';
+    renderPage('modules'); updateQuick();
+  }
+});
+
+/* -------------------------
+  quiz builder
+------------------------- */
+addQ.addEventListener('click', ()=> addQNode());
+qCancel.addEventListener('click', ()=> { quizModal.style.display='none'; qb.innerHTML=''; });
+qSave.addEventListener('click', ()=>{
+  const title = qTitle.value.trim(); if(!title) return alert('Enter quiz title');
+  const nodes = Array.from(qb.children);
+  if(nodes.length === 0) return alert('Add at least one question');
+  const questions = nodes.map(n=> {
+    const q = n.querySelector('.qtxt').value.trim();
+    const choices = [n.querySelector('.c0').value.trim(), n.querySelector('.c1').value.trim(), n.querySelector('.c2').value.trim(), n.querySelector('.c3').value.trim()];
+    const ans = parseInt(n.querySelector('.ans').value, 10);
+    return {q, choices, answerIndex: ans};
+  });
+  const id = uid('q'); const due = qDue.value || null;
+  quizzes.unshift({id, title, due, questions, createdAt: now(), attempts: {}});
+  save(LS_QUIZ, quizzes);
+  qb.innerHTML=''; qTitle.value=''; qDue.value=''; quizModal.style.display='none'; renderPage('quizzes'); updateQuick();
+});
+function addQNode(){
+  const idx = qb.children.length;
+  const node = document.createElement('div'); node.className='card'; node.style.padding='8px';
+  node.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><strong>Question ${idx+1}</strong><button class="btn remQ">Remove</button></div>
+  <input class="input qtxt" placeholder="Question text" style="margin-top:8px" />
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+    <input class="input c0" placeholder="Choice A" />
+    <input class="input c1" placeholder="Choice B" />
+    <input class="input c2" placeholder="Choice C" />
+    <input class="input c3" placeholder="Choice D" />
+  </div>
+  <div style="margin-top:8px">Correct: <select class="ans"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div>`;
+  qb.appendChild(node);
+  node.querySelector('.remQ').addEventListener('click', ()=> node.remove());
+}
+
+/* -------------------------
+  Navigation
+------------------------- */
+document.querySelectorAll('.nav-link').forEach(a=> a.addEventListener('click', (e)=> { e.preventDefault(); document.querySelectorAll('.nav-link').forEach(n=> n.classList.remove('active')); a.classList.add('active'); renderPage(a.dataset.page); }));
+
+/* -------------------------
+  Render pages & features
+------------------------- */
+function renderPage(page){
+  accounts = loadObj(LS_ACCOUNTS);
+  students = loadArr(LS_STUDENTS);
+  assignments = loadArr(LS_ASSIGN);
+  modules = loadArr(LS_MODULES);
+  quizzes = loadArr(LS_QUIZ);
+  role = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+
+  if(page === 'stream') renderStream();
+  else if(page === 'classwork') renderClasswork();
+  else if(page === 'modules') renderModules();
+  else if(page === 'quizzes') renderQuizzes();
+  else if(page === 'grades') renderGrades();
+  else if(page === 'people') renderPeople();
+  else if(page === 'teacher') renderTeacher();
+}
+
+/* Stream */
+function renderStream(){
+  main.innerHTML=''; const card = el('div','card'); card.innerHTML = `<h2>Stream</h2><div class="muted">Recent activity</div>`; const feed = el('div'); feed.style.marginTop='12px';
+  assignments.slice(0,6).forEach(a=>{ const n=el('div','card'); n.style.padding='10px'; n.innerHTML = `<strong>${esc(a.title)}</strong><div class="tiny">${esc(a.desc||'')}</div><div class="tiny">Due: ${a.due?fmtShort(a.due):'No due date'}</div>`; feed.appendChild(n); });
+  modules.slice(0,6).forEach(m=>{ const n=el('div','card'); n.style.padding='10px'; n.innerHTML = `<strong>${esc(m.title)}</strong><div class="tiny">${esc(m.desc||'')}</div><div class="tiny">Module due: ${m.due?fmtShort(m.due):'No due date'}</div>`; feed.appendChild(n); });
+  let subs=[]; assignments.forEach(a=>{ Object.keys(a.submissions||{}).forEach(sid=> subs.push({type:'assignment',title:a.title,file:a.submissions[sid].fileName,when:a.submissions[sid].submittedAt, sid})); });
+  modules.forEach(m=>{ Object.keys(m.submissions||{}).forEach(sid=> subs.push({type:'module',title:m.title,file:m.submissions[sid].fileName,when:m.submissions[sid].submittedAt, sid})); });
+  subs.sort((a,b)=> new Date(b.when) - new Date(a.when));
+  if(subs.length){ const h=el('h3'); h.textContent='Recent submissions'; feed.appendChild(h); subs.slice(0,10).forEach(s=>{ const st = students.find(x=>x.id===s.sid); const r = el('div','card'); r.style.padding='8px'; r.innerHTML = `<div style="display:flex;justify-content:space-between"><div><strong>${esc(s.file)}</strong><div class="tiny">${esc(s.title)} · by ${esc(st?st.name:'Unknown')} · ${esc(s.type)}</div></div><div class="tiny">${fmtTime(s.when)}</div></div>`; feed.appendChild(r); }); } else feed.innerHTML += `<div class="muted tiny" style="margin-top:8px">No submissions yet.</div>`;
+  card.appendChild(feed); main.appendChild(card);
+}
+
+/* Classwork */
+function renderClasswork(){
+  main.innerHTML=''; const card = el('div','card'); card.innerHTML='<h2>Classwork</h2><div class="muted">Assignments</div>'; const list=el('div'); list.style.marginTop='12px';
+  if(assignments.length===0) list.innerHTML=`<div class="muted" style="padding:12px">No assignments.</div>`; else assignments.forEach(a=>{ const box=el('div','assign'); const left=el('div','left'); left.innerHTML = `<div style="font-weight:800">${esc(a.title)}</div><div class="tiny">${esc(a.desc||'')}</div><div class="tiny" style="margin-top:6px">Due: ${a.due?fmtShort(a.due):'No due date'}</div>`; const right=el('div'); const dueBadge = a.due && isPast(a.due) ? `<span class="badge due">Due passed</span>` : `<span class="badge open">Open</span>`; const viewBtn=`<button class="btn" data-act="view" data-id="${a.id}">View</button>`; const subsBtn = (role && role.type==='teacher')? `<button class="btn" data-act="subs" data-id="${a.id}">Submissions</button>` : ''; right.innerHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">${dueBadge}<div class="controls">${viewBtn}${subsBtn}</div></div>`; box.appendChild(left); box.appendChild(right); list.appendChild(box); });
+  card.appendChild(list); main.appendChild(card);
+  main.querySelectorAll('button[data-act="view"]').forEach(b=> b.addEventListener('click', e=> renderAssignmentDetail(e.currentTarget.dataset.id)));
+  main.querySelectorAll('button[data-act="subs"]').forEach(b=> b.addEventListener('click', e=> renderAssignmentSubmissions(e.currentTarget.dataset.id)));
+}
+
+/* Assignment detail */
+function renderAssignmentDetail(aid){
+  const a = assignments.find(x=>x.id===aid); if(!a) return alert('Assignment not found');
+  main.innerHTML=''; const top=el('div','card'); top.innerHTML = `<h2>${esc(a.title)}</h2><div class="muted">Due: ${a.due?fmtShort(a.due):'No due date'}</div><div style="margin-top:12px">${esc(a.desc||'')}</div>`; main.appendChild(top);
+  const r = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+  if(r && r.type==='student'){
+    const accs = loadObj(LS_ACCOUNTS); const acc = accs[r.username]; if(!acc) return alert('Account missing');
+    const sid = acc.studentId; const stu = students.find(s=>s.id===sid);
+    const sub = a.submissions && a.submissions[sid] ? a.submissions[sid] : null;
+    const card2 = el('div','card'); card2.style.marginTop='12px'; card2.innerHTML = `<h3>Submit — ${esc(stu.name)}</h3>`; const status = sub ? `<div class="status submitted">Submitted: ${fmtTime(sub.submittedAt)}</div>` : `<div class="status missing">Not submitted</div>`; card2.innerHTML += `<div style="margin-top:8px">${status}</div>`;
+    const duePassed = a.due && isPast(a.due);
+    const fileId = `file_${aid}_${sid}`;
+    card2.innerHTML += `<div style="margin-top:8px" class="row"><input type="file" id="${fileId}"><div class="right"><button class="btn" id="submitBtn">Upload & Submit</button></div></div><div class="tiny" style="margin-top:8px">Current file: ${ sub ? `<a class="file-link" target="_blank" href="${sub.fileUrl}">${esc(sub.fileName)}</a>` : '-' }</div><div class="tiny" style="margin-top:6px">Grade: ${ sub && sub.grade!==undefined && sub.grade!=='' ? esc(String(sub.grade)) : 'Not graded yet'}</div>`;
+    if(duePassed && !sub){ card2.innerHTML += `<div class="tiny" style="margin-top:8px;color:#b31412">Deadline passed — will be marked Late.</div>`; }
+    main.appendChild(card2);
+    document.getElementById('submitBtn').addEventListener('click', ()=> {
+      const fi = document.getElementById(fileId); if(!fi.files || fi.files.length===0) return alert('Choose file'); const f = fi.files[0];
+      const max = Number(getComputedStyle(document.documentElement).getPropertyValue('--max-file-mb'))*1024*1024; if(f.size>max) return alert('File too large (max ' + getComputedStyle(document.documentElement).getPropertyValue('--max-file-mb') + 'MB)');
+      const reader = new FileReader();
+      reader.onload = (ev)=> {
+        a.submissions = a.submissions || {};
+        const submittedAt = now();
+        const isLate = a.due ? (new Date(submittedAt) > new Date(a.due + 'T23:59:59')) : false;
+        a.submissions[sid] = { fileName: f.name, fileUrl: ev.target.result, submittedAt, grade: sub? sub.grade : '', late: isLate };
+        save(LS_ASSIGN, assignments);
+        alert('Submitted');
+        renderAssignmentDetail(aid);
+      };
+      reader.readAsDataURL(f);
+    });
+  } else if(r && r.type==='teacher'){
+    const card2 = el('div','card'); card2.innerHTML = `<h3>Teacher tools</h3><div class="tiny">Open submissions to review & grade</div><div style="margin-top:8px"><button class="btn" id="openSubs">Open Submissions</button></div>`; main.appendChild(card2);
+    document.getElementById('openSubs').addEventListener('click', ()=> renderAssignmentSubmissions(aid));
+  } else {
+    main.appendChild(el('div','card')).innerHTML = `<div class="muted">Please login as a student to submit, or as teacher to review.</div>`;
+  }
+}
+
+/* Assignment submissions (teacher) */
+function renderAssignmentSubmissions(aid){
+  const a = assignments.find(x=>x.id===aid); if(!a) return alert('Assignment not found');
+  main.innerHTML=''; main.appendChild(el('div','card')).innerHTML = `<h2>Submissions — ${esc(a.title)}</h2><div class="muted">Due: ${a.due?fmtShort(a.due):'No due date'}</div>`;
+  const wrap = el('div','card'); const table = el('table'); table.className='table'; table.innerHTML = `<tr><th>Student</th><th>File</th><th>Submitted At</th><th>Status</th><th>Grade</th></tr>`;
+  students.forEach(s=> { const sub = a.submissions && a.submissions[s.id] ? a.submissions[s.id] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(s.name)}</td><td>${ sub ? `<a target="_blank" class="file-link" href="${sub.fileUrl}">${esc(sub.fileName)}</a>` : '-' }</td><td>${ sub ? fmtTime(sub.submittedAt) : '-' }</td><td class="status ${ sub ? 'submitted' : 'missing' }">${ sub ? (sub.late? 'Late':'On time') : 'Missing' }</td><td>${ sub ? `<input type="number" min="0" max="${a.points||100}" value="${sub.grade||''}" data-sid="${s.id}" class="gradeIn" style="width:90px;padding:6px;border-radius:8px;border:1px solid #ddd">` : '-' }</td>`; table.appendChild(tr); });
+  wrap.appendChild(table); main.appendChild(wrap);
+  wrap.querySelectorAll('.gradeIn').forEach(inp=> inp.addEventListener('input', (e)=> { const sid = e.target.dataset.sid; const val = e.target.value; a.submissions = a.submissions || {}; if(!a.submissions[sid]) return; a.submissions[sid].grade = val; save(LS_ASSIGN, assignments); }));
+}
+
+/* Modules */
+function renderModules(){
+  main.innerHTML=''; const top = el('div','card'); top.innerHTML = `<h2>Modules</h2><div class="muted">Learning modules — teacher uploads materials and sets due dates</div>`; main.appendChild(top);
+  const list = el('div'); list.style.marginTop='12px';
+  if(modules.length === 0) list.innerHTML = `<div class="muted" style="padding:12px">No modules.</div>`; else modules.forEach(m=>{ const box = el('div','assign'); const left = el('div','left'); left.innerHTML = `<div style="font-weight:800">${esc(m.title)}</div><div class="tiny">${esc(m.desc||'')}</div><div class="tiny" style="margin-top:6px">Due: ${m.due?fmtShort(m.due):'No due date'}</div>`; const right = el('div'); const badge = m.due && isPast(m.due) ? `<span class="badge due">Due passed</span>` : `<span class="badge open">Open</span>`; const viewBtn = `<button class="btn" data-act="viewmod" data-id="${m.id}">Open Module</button>`; const subsBtn = (role && role.type==='teacher') ? `<button class="btn" data-act="modsubs" data-id="${m.id}">Submissions</button>` : ''; right.innerHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">${badge}<div class="controls">${viewBtn}${subsBtn}</div></div>`; box.appendChild(left); box.appendChild(right); list.appendChild(box); });
+  top.appendChild(list); main.appendChild(top);
+  main.querySelectorAll('button[data-act="viewmod"]').forEach(b=> b.addEventListener('click', e=> renderModuleDetail(e.currentTarget.dataset.id)));
+  main.querySelectorAll('button[data-act="modsubs"]').forEach(b=> b.addEventListener('click', e=> renderModuleSubmissions(e.currentTarget.dataset.id)));
+}
+
+/* Module detail */
+function renderModuleDetail(mid){
+  const m = modules.find(x=>x.id===mid); if(!m) return alert('Module not found');
+  main.innerHTML=''; const top = el('div','card'); top.innerHTML = `<h2>${esc(m.title)}</h2><div class="muted">Due: ${m.due?fmtShort(m.due):'No due date'}</div><div style="margin-top:12px">${esc(m.desc||'')}</div>`; if(m.fileUrl) top.innerHTML += `<div style="margin-top:10px"><a class="file-link" href="${m.fileUrl}" target="_blank">${esc(m.fileName)}</a></div>`; main.appendChild(top);
+  const r = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+  if(r && r.type==='student'){
+    const accs = loadObj(LS_ACCOUNTS); const acc = accs[r.username]; if(!acc) return alert('Account missing');
+    const sid = acc.studentId; const stu = students.find(s=>s.id===sid);
+    const sub = m.submissions && m.submissions[sid] ? m.submissions[sid] : null;
+    const c = el('div','card'); c.style.marginTop='12px'; c.innerHTML = `<h3>Submit module — ${esc(stu.name)}</h3>`; c.innerHTML += `<div style="margin-top:8px">${ sub ? `<div class="status submitted">Submitted: ${fmtTime(sub.submittedAt)}</div>` : `<div class="status missing">Not submitted</div>` }</div>`; const duePassed = m.due && isPast(m.due); if(duePassed && !sub) c.innerHTML += `<div class="tiny" style="margin-top:8px;color:#b31412">Deadline passed — will be marked Late.</div>`; const fileId = `modfile_${mid}_${sid}`; c.innerHTML += `<div style="margin-top:8px" class="row"><input type="file" id="${fileId}"><div class="right"><button class="btn" id="submitMod">Upload & Submit</button></div></div><div class="tiny" style="margin-top:8px">Current file: ${ sub ? `<a class="file-link" target="_blank" href="${sub.fileUrl}">${esc(sub.fileName)}</a>` : '-' }</div><div class="tiny" style="margin-top:6px">Grade: ${ sub && sub.grade!==undefined && sub.grade!=='' ? esc(String(sub.grade)) : 'Not graded yet'}</div>`; main.appendChild(c);
+    document.getElementById('submitMod').addEventListener('click', ()=> {
+      const fi = document.getElementById(fileId); if(!fi.files || fi.files.length===0) return alert('Choose file'); const f=fi.files[0]; const max = Number(getComputedStyle(document.documentElement).getPropertyValue('--max-file-mb'))*1024*1024; if(f.size>max) return alert('File too large');
+      const reader = new FileReader();
+      reader.onload = (ev)=> {
+        m.submissions = m.submissions || {};
+        const submittedAt = now();
+        const isLate = m.due ? (new Date(submittedAt) > new Date(m.due + 'T23:59:59')) : false;
+        m.submissions[sid] = { fileName: f.name, fileUrl: ev.target.result, submittedAt, grade: sub? sub.grade : '', late: isLate };
+        save(LS_MODULES, modules);
+        alert('Module submitted');
+        renderModuleDetail(mid);
+      };
+      reader.readAsDataURL(f);
+    });
+  } else if(r && r.type==='teacher'){
+    const c = el('div','card'); c.innerHTML = `<h3>Teacher tools</h3><div style="margin-top:8px"><button class="btn" id="openModSubs">Open Module Submissions</button></div>`; main.appendChild(c);
+    document.getElementById('openModSubs').addEventListener('click', ()=> renderModuleSubmissions(mid));
+  } else {
+    main.appendChild(el('div','card')).innerHTML = `<div class="muted">Please login to submit or review this module.</div>`;
+  }
+}
+
+/* Module submissions (teacher) */
+function renderModuleSubmissions(mid){
+  const m = modules.find(x=>x.id===mid); if(!m) return alert('Module not found');
+  main.innerHTML=''; main.appendChild(el('div','card')).innerHTML = `<h2>Module Submissions — ${esc(m.title)}</h2><div class="muted">Due: ${m.due?fmtShort(m.due):'No due date'}</div>`;
+  const wrap = el('div','card'); const table = el('table'); table.className='table'; table.innerHTML = `<tr><th>Student</th><th>File</th><th>Submitted At</th><th>Status</th><th>Grade</th></tr>`;
+  students.forEach(s=> { const sub = m.submissions && m.submissions[s.id] ? m.submissions[s.id] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(s.name)}</td><td>${ sub ? `<a target="_blank" class="file-link" href="${sub.fileUrl}">${esc(sub.fileName)}</a>` : '-' }</td><td>${ sub ? fmtTime(sub.submittedAt) : '-' }</td><td class="status ${ sub ? 'submitted' : 'missing' }">${ sub ? (sub.late ? 'Late' : 'On time') : 'Missing' }</td><td>${ sub ? `<input type="number" min="0" max="100" value="${sub.grade||''}" data-sid="${s.id}" class="gradeInMod" style="width:90px;padding:6px;border-radius:8px;border:1px solid #ddd">` : '-' }</td>`; table.appendChild(tr); });
+  wrap.appendChild(table); main.appendChild(wrap);
+  wrap.querySelectorAll('.gradeInMod').forEach(inp=> inp.addEventListener('input', (e)=> { const sid = e.target.dataset.sid; const val = e.target.value; m.submissions = m.submissions || {}; if(!m.submissions[sid]) return; m.submissions[sid].grade = val; save(LS_MODULES, modules); }));
+}
+
+/* Quizzes */
+function renderQuizzes(){
+  main.innerHTML=''; const top = el('div','card'); top.innerHTML = `<h2>Quizzes</h2><div class="muted">Create or take quizzes (MCQ)</div>`; main.appendChild(top);
+  const list = el('div'); list.style.marginTop='12px';
+  if(quizzes.length===0) list.innerHTML = `<div class="muted" style="padding:12px">No quizzes.</div>`; else quizzes.forEach(q=>{ const box = el('div','assign'); const left = el('div','left'); left.innerHTML = `<div style="font-weight:800">${esc(q.title)}</div><div class="tiny">Questions: ${q.questions.length}</div><div class="tiny">Due: ${q.due?fmtShort(q.due):'No due date'}</div>`; const right = el('div'); const viewBtn=`<button class="btn" data-act="take" data-id="${q.id}">Take</button>`; const resBtn = (role && role.type==='teacher')? `<button class="btn" data-act="results" data-id="${q.id}">Results</button>` : ''; right.innerHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="badge open">Quiz</div><div class="controls">${viewBtn}${resBtn}</div></div>`; box.appendChild(left); box.appendChild(right); list.appendChild(box); });
+  main.appendChild(list);
+  main.querySelectorAll('button[data-act="take"]').forEach(b=> b.addEventListener('click', e=> takeQuiz(e.currentTarget.dataset.id)));
+  main.querySelectorAll('button[data-act="results"]').forEach(b=> b.addEventListener('click', e=> viewQuizResults(e.currentTarget.dataset.id)));
+}
+
+/* take quiz */
+function takeQuiz(qid){
+  const q = quizzes.find(x=>x.id===qid); if(!q) return alert('Quiz not found');
+  main.innerHTML=''; main.appendChild(el('div','card')).innerHTML = `<h2>Quiz: ${esc(q.title)}</h2><div class="muted">Due: ${q.due?fmtShort(q.due):'No due date'}</div>`;
+  const r = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+  if(!r || r.type!=='student'){ main.appendChild(el('div','card')).innerHTML = `<div class="muted">Log in as a student to take this quiz.</div>`; return; }
+  const form = el('form'); form.style.marginTop='12px';
+  q.questions.forEach((qq,idx)=>{ const qi = el('div','card'); qi.style.padding='8px'; qi.innerHTML = `<div><strong>Q${idx+1}.</strong> ${esc(qq.q)}</div>`; const choices = el('div'); choices.style.marginTop='8px'; qq.choices.forEach((c,ci)=> choices.innerHTML += `<label style="display:block;margin-bottom:6px"><input name="q${idx}" type="radio" value="${ci}"> ${esc(c)}</label>` ); qi.appendChild(choices); form.appendChild(qi); });
+  const submitBtn = el('button'); submitBtn.className='btn'; submitBtn.type='button'; submitBtn.textContent='Submit Quiz'; form.appendChild(submitBtn); main.appendChild(form);
+  submitBtn.addEventListener('click', ()=> {
+    const answers = []; let correct=0; q.questions.forEach((qq,idx)=> { const sel = form.querySelector(`input[name="q${idx}"]:checked`); const v = sel ? parseInt(sel.value,10) : null; answers.push(v); if(v===qq.answerIndex) correct++; });
+    const total = q.questions.length; const score = Math.round((correct/total)*100);
+    const r = JSON.parse(localStorage.getItem(LS_ROLE)); const acc = loadObj(LS_ACCOUNTS)[r.username] || null;
+    if(!acc) return alert('Account missing');
+    q.attempts = q.attempts || {}; q.attempts[acc.studentId] = q.attempts[acc.studentId] || []; q.attempts[acc.studentId].push({ score, total, submittedAt: now() });
+    save(LS_QUIZ, quizzes);
+    alert(`You scored ${score}% (${correct}/${total})`); renderPage('quizzes');
+  });
+}
+
+/* view quiz results (teacher) */
+function viewQuizResults(qid){
+  const q = quizzes.find(x=>x.id===qid); if(!q) return alert('Not found'); main.innerHTML=''; main.appendChild(el('div','card')).innerHTML = `<h2>Results — ${esc(q.title)}</h2><div class="muted">Per-student attempts</div>`;
+  const tbl = el('table'); tbl.className='table'; tbl.innerHTML = `<tr><th>Student</th><th>Attempts</th><th>Latest Score</th></tr>`;
+  students.forEach(s=> { const atts = q.attempts && q.attempts[s.id] ? q.attempts[s.id] : []; const last = atts.length ? atts[atts.length-1] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(s.name)}</td><td>${atts.length}</td><td>${ last ? esc(String(last.score)+'%') : '-' }</td>`; tbl.appendChild(tr); });
+  main.appendChild(tbl);
+}
+
+/* Grades */
+function renderGrades(){
+  main.innerHTML=''; const r = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+  if(!r){ main.appendChild(el('div','card')).innerHTML = `<div class="muted">Please login to view grades.</div>`; return; }
+  if(r.type==='student'){
+    const acc = loadObj(LS_ACCOUNTS)[r.username]; const sid = acc.studentId;
+    main.appendChild(el('div','card')).innerHTML = `<h2>My Grades</h2><div class="muted">Assignments, Modules & Quizzes</div>`;
+    const aCard = el('div','card'); aCard.innerHTML = `<h3>Assignments</h3>`; const at = el('table'); at.className='table'; at.innerHTML = `<tr><th>Assignment</th><th>File</th><th>Grade</th><th>Status</th></tr>`;
+    assignments.forEach(a=> { const sub = a.submissions && a.submissions[sid] ? a.submissions[sid] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(a.title)}</td><td>${ sub ? `<a class="file-link" target="_blank" href="${sub.fileUrl}">${esc(sub.fileName)}</a>` : '-' }</td><td>${ sub && sub.grade!==undefined && sub.grade!=='' ? esc(String(sub.grade)) : '-' }</td><td class="status ${ sub ? 'submitted' : 'missing' }">${ sub ? (sub.late ? 'Late' : 'On time') : 'Missing' }</td>`; at.appendChild(tr); });
+    aCard.appendChild(at); main.appendChild(aCard);
+    const mCard = el('div','card'); mCard.innerHTML = `<h3>Modules</h3>`; const mt = el('table'); mt.className='table'; mt.innerHTML = `<tr><th>Module</th><th>File</th><th>Grade</th><th>Status</th></tr>`;
+    modules.forEach(m=> { const sub = m.submissions && m.submissions[sid] ? m.submissions[sid] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(m.title)}</td><td>${ m.fileUrl ? `<a class="file-link" target="_blank" href="${m.fileUrl}">${esc(m.fileName)}</a>` : '-' }</td><td>${ sub && sub.grade!==undefined && sub.grade!=='' ? esc(String(sub.grade)) : '-' }</td><td class="status ${ sub ? 'submitted' : 'missing' }">${ sub ? (sub.late ? 'Late' : 'On time') : 'Missing' }</td>`; mt.appendChild(tr); });
+    mCard.appendChild(mt); main.appendChild(mCard);
+    const qCard = el('div','card'); qCard.innerHTML = `<h3>Quizzes</h3>`; const qt = el('table'); qt.className='table'; qt.innerHTML = `<tr><th>Quiz</th><th>Latest Score</th><th>Attempts</th></tr>`;
+    quizzes.forEach(q=> { const atts = q.attempts && q.attempts[sid] ? q.attempts[sid] : []; const last = atts.length ? atts[atts.length-1] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(q.title)}</td><td>${ last ? esc(String(last.score)+'%') : '-' }</td><td>${atts.length}</td>`; qt.appendChild(tr); });
+    qCard.appendChild(qt); main.appendChild(qCard);
+  } else if(r.type==='teacher'){
+    main.appendChild(el('div','card')).innerHTML = `<h2>All Grades</h2><div class="muted">Assignments & Modules</div>`;
+    assignments.forEach(a=> { const wrap = el('div','card'); wrap.innerHTML = `<strong>${esc(a.title)}</strong><div class="tiny">${esc(a.desc||'')}</div>`; const tbl = el('table'); tbl.className='table'; tbl.innerHTML = `<tr><th>Student</th><th>File</th><th>Grade</th></tr>`; students.forEach(s=> { const sub = a.submissions && a.submissions[s.id] ? a.submissions[s.id] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(s.name)}</td><td>${ sub ? `<a target="_blank" class="file-link" href="${sub.fileUrl}">${esc(sub.fileName)}</a>` : '-' }</td><td>${ sub && sub.grade!==undefined && sub.grade!=='' ? esc(String(sub.grade)) : '-' }</td>`; tbl.appendChild(tr); }); wrap.appendChild(tbl); main.appendChild(wrap); });
+    main.appendChild(el('div','card')).innerHTML = `<h3>Module Grades</h3>`; modules.forEach(m=> { const wrap = el('div','card'); wrap.innerHTML = `<strong>${esc(m.title)}</strong>`; const tbl = el('table'); tbl.className='table'; tbl.innerHTML = `<tr><th>Student</th><th>File</th><th>Grade</th></tr>`; students.forEach(s=> { const sub = m.submissions && m.submissions[s.id] ? m.submissions[s.id] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(s.name)}</td><td>${ sub ? `<a target="_blank" class="file-link" href="${sub.fileUrl}">${esc(sub.fileName)}</a>` : '-' }</td><td>${ sub && sub.grade!==undefined && sub.grade!=='' ? esc(String(sub.grade)) : '-' }</td>`; tbl.appendChild(tr); }); wrap.appendChild(tbl); main.appendChild(wrap); });
+    main.appendChild(el('div','card')).innerHTML = `<h3>Quizzes</h3><div class="tiny">Per-quiz student scores</div>`;
+    quizzes.forEach(q=> { const wrap = el('div','card'); wrap.innerHTML = `<strong>${esc(q.title)}</strong>`; const tbl = el('table'); tbl.className='table'; tbl.innerHTML = `<tr><th>Student</th><th>Latest Score</th><th>Attempts</th></tr>`; students.forEach(s=> { const atts = q.attempts && q.attempts[s.id] ? q.attempts[s.id] : []; const last = atts.length ? atts[atts.length-1] : null; const tr = el('tr'); tr.innerHTML = `<td>${esc(s.name)}</td><td>${ last ? esc(String(last.score)+'%') : '-' }</td><td>${atts.length}</td>`; tbl.appendChild(tr); }); wrap.appendChild(tbl); main.appendChild(wrap); });
+  }
+}
+
+/* People */
+function renderPeople(){
+  main.innerHTML=''; const top = el('div','card'); top.innerHTML = `<h2>People</h2><div class="muted">Manage students & accounts</div>`; main.appendChild(top);
+  const list = el('div'); list.style.marginTop='12px';
+  if(students.length===0) list.innerHTML = `<div class="muted small">No students yet.</div>`; else students.forEach((s,idx)=>{ const p = el('div','people'); const row = el('div','person'); const acc = Object.values(loadObj(LS_ACCOUNTS)).find(a=>a.studentId===s.id); const uname = acc ? acc.username : ''; row.innerHTML = `<div><strong>${esc(s.name)}</strong><div class="tiny">ID: ${s.id}${uname? ' · username: ' + esc(uname):''}</div></div><div style="display:flex;gap:8px"><button class="btn" data-act="login" data-id="${s.id}">Login as</button><button class="btn" data-act="cred" data-idx="${idx}">Show creds</button><button class="btn" data-act="remove" data-idx="${idx}">Remove</button></div>`; p.appendChild(row); list.appendChild(p); });
+  const add = el('div','card'); add.innerHTML = `<div style="display:flex;gap:8px"><input id="newName" class="input" placeholder="Student full name"><input id="newU" class="input" placeholder="username (optional)"><input id="newP" class="input" placeholder="password (optional)"><button id="addStu" class="btn">Add student</button></div>`; main.appendChild(list); main.appendChild(add);
+  document.getElementById('addStu').addEventListener('click', ()=> {
+    const name = document.getElementById('newName').value.trim(); if(!name) return alert('Enter name');
+    const usernameInput = document.getElementById('newU').value.trim(); const passInput = document.getElementById('newP').value;
+    const sid = uid('stu'); students.push({id:sid, name}); save(LS_STUDENTS, students);
+    accounts = loadObj(LS_ACCOUNTS);
+    let uname = usernameInput || name.toLowerCase().replace(/\s+/g,'_');
+    const base = uname; let i=1; while(accounts[uname]){ uname = base + i; i++; }
+    const pass = passInput && passInput.length>0 ? passInput : generatePassword(6);
+    accounts[uname] = { username: uname, password: pass, role:'student', studentId: sid }; save(LS_ACCOUNTS, accounts);
+    alert(`Student added.\nusername: ${uname}\npassword: ${pass}`);
+    renderPeople();
+  });
+
+  list.querySelectorAll('button[data-act="remove"]').forEach(btn=> btn.addEventListener('click', e=>{ const idx = Number(e.currentTarget.dataset.idx); if(!confirm('Remove student?')) return; const sid = students[idx].id;
+    assignments.forEach(a=>{ if(a.submissions && a.submissions[sid]) delete a.submissions[sid]; });
+    modules.forEach(m=>{ if(m.submissions && m.submissions[sid]) delete m.submissions[sid]; });
+    const accs = loadObj(LS_ACCOUNTS); Object.keys(accs).forEach(k=> { if(accs[k].studentId === sid) delete accs[k]; }); save(LS_ACCOUNTS, accs);
+    students.splice(idx,1); save(LS_STUDENTS, students); save(LS_ASSIGN, assignments); save(LS_MODULES, modules); renderPeople();
+  })); 
+
+  list.querySelectorAll('button[data-act="login"]').forEach(btn=> btn.addEventListener('click', e=>{ const sid = e.currentTarget.dataset.id; const accs = loadObj(LS_ACCOUNTS); const acc = Object.values(accs).find(a=>a.studentId===sid); if(!acc) return alert('No account'); localStorage.setItem(LS_ROLE, JSON.stringify({type:'student', username:acc.username, studentId: sid})); init(); }));
+
+  list.querySelectorAll('button[data-act="cred"]').forEach(btn=> btn.addEventListener('click', e=>{ const idx = Number(e.currentTarget.dataset.idx); const s = students[idx]; const accs = loadObj(LS_ACCOUNTS); const acc = Object.values(accs).find(a=>a.studentId===s.id); if(!acc) return alert('No credentials'); alert(`Credentials for ${s.name}\nusername: ${acc.username}\npassword: ${acc.password}`); }));
+}
+
+/* Teacher dashboard */
+function renderTeacher(){
+  main.innerHTML=''; const c = el('div','card'); c.innerHTML = `<h2>Teacher Dashboard</h2><div class="muted">Overview: assignments, modules & quizzes</div>`; main.appendChild(c);
+  if(assignments.length===0) main.appendChild(el('div','card')).innerHTML='<div class="muted">No assignments.</div>';
+  assignments.forEach(a=>{ const w = el('div','card'); w.innerHTML = `<strong>${esc(a.title)}</strong><div class="tiny">${esc(a.desc||'')}</div><div class="tiny">Due: ${a.due?fmtShort(a.due):'No due date'}</div><div style="margin-top:8px"><button class="btn" data-act="open" data-id="${a.id}">Open Submissions</button></div>`; main.appendChild(w); });
+  const modBtn = el('button'); modBtn.className='btn'; modBtn.style.marginTop='10px'; modBtn.textContent='+ Add Module'; modBtn.onclick = ()=> createModuleModal.style.display='flex'; main.appendChild(modBtn);
+  main.querySelectorAll('button[data-act="open"]').forEach(b=> b.addEventListener('click', e=> renderAssignmentSubmissions(e.currentTarget.dataset.id)));
+}
+
+/* -------------------------
+  utils & init
+------------------------- */
+function el(tag, cls){ const d=document.createElement(tag); if(cls) d.className = cls; return d; }
+function generatePassword(n=6){ const chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let s=''; for(let i=0;i<n;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
+function updateQuick(){ quick.innerHTML = (assignments.length===0 && modules.length===0) ? 'No assignments/modules yet.' : (assignments.filter(a=>a.due).slice(0,3).map(a=> `${esc(a.title)} — ${fmtShort(a.due)}`).join('<br>') || modules.filter(m=>m.due).slice(0,3).map(m=> `${esc(m.title)} — ${fmtShort(m.due)}`).join('<br>') ); }
+
+document.getElementById('resetBtn').addEventListener('click', ()=> {
+  if(!confirm('This will clear demo data (students, assignments, modules, quizzes, accounts, role). Continue?')) return;
+  localStorage.removeItem(LS_ACCOUNTS); localStorage.removeItem(LS_STUDENTS); localStorage.removeItem(LS_ASSIGN); localStorage.removeItem(LS_MODULES); localStorage.removeItem(LS_QUIZ); localStorage.removeItem(LS_ROLE);
+  accounts = {}; students = []; assignments = []; modules = []; quizzes = [];
+  accounts[DEFAULT_TEACHER.username] = {...DEFAULT_TEACHER}; save(LS_ACCOUNTS, accounts);
+  init();
+});
+
+/* init */
+function init(){
+  accounts = loadObj(LS_ACCOUNTS);
+  students = loadArr(LS_STUDENTS);
+  assignments = loadArr(LS_ASSIGN);
+  modules = loadArr(LS_MODULES);
+  quizzes = loadArr(LS_QUIZ);
+  role = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+  if(!accounts[DEFAULT_TEACHER.username]){ accounts[DEFAULT_TEACHER.username] = {...DEFAULT_TEACHER}; save(LS_ACCOUNTS, accounts); }
+  updateHeader();
+  document.querySelectorAll('.nav-link').forEach(n=> n.classList.remove('active'));
+  document.querySelector('.nav-link[data-page="stream"]').classList.add('active');
+  renderPage('stream');
+}
+init();
+
+/* modal close by clicking backdrop */
+loginModal.addEventListener('click', (e)=> { if(e.target === loginModal) loginModal.style.display='none'; });
+createAssignModal.addEventListener('click', (e)=> { if(e.target === createAssignModal) createAssignModal.style.display='none'; });
+createModuleModal.addEventListener('click', (e)=> { if(e.target === createModuleModal) createModuleModal.style.display='none'; });
+quizModal.addEventListener('click', (e)=> { if(e.target === quizModal) quizModal.style.display='none'; });
+
+/* show create quiz button for teacher on Quizzes page */
+document.querySelector('.nav-link[data-page="quizzes"]').addEventListener('click', ()=> {
+  setTimeout(()=> {
+    const r = JSON.parse(localStorage.getItem(LS_ROLE)) || null;
+    const header = main.querySelector('.card');
+    if(r && r.type==='teacher' && header){
+      let existing = header.querySelector('.create-quiz-btn');
+      if(existing) return;
+      const btn = el('button'); btn.className = 'btn create-quiz-btn'; btn.style.marginLeft='8px'; btn.textContent = '+ Create Quiz';
+      btn.onclick = ()=> { quizModal.style.display='flex'; qb.innerHTML=''; addQNode(); addQNode(); addQNode(); qTitle.value=''; qDue.value=''; };
+      header.appendChild(btn);
+    }
+  }, 120);
+});
+
+/* expose renderPage globally */
+window.renderPage = renderPage;
+</script>
+</body>
+</html>
